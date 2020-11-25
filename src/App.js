@@ -67,7 +67,7 @@ class App extends Component {
 
             <div class="product">
               <div class="product-image">
-                <img src="https://s.cdpn.io/3/large-NutroNaturalChoiceAdultLambMealandRiceDryDogFood.png" alt="Nutro"/>
+                <img src="https://s.cdpn.io/3/dingo-dog-bones.jpg" alt="Nutro"/>
               </div>
               <div class="product-details">
                 <div class="product-title">

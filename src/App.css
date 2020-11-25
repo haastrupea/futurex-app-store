@@ -129,9 +129,7 @@ label {
 
 .product-image {
   text-align: center;
-  img {
-    width: 100px;
-  }
+  img : width = 100px;
 }
 .product-details .product-title {
   margin-right: 20px;

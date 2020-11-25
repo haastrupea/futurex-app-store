@@ -16,6 +16,7 @@ class App extends Component {
     .then(res=>res.json())
     .then(json=>console.log(json))
     .then(json=> {
+      console.log(json)
       this.setState({
         isLoading: true,
         items: json,
@@ -36,6 +37,7 @@ class App extends Component {
       return (
         <div className="App">
           Data has been loaded
+          
         </div>
       );
     }

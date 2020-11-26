@@ -7,19 +7,39 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      items: [],
+      cartProduct: {
+
+      },
+      cart: {},
       isLoading: false,
     };
   }
 
+  updateCartProduct(quantity, price, productId) {
+
+    
+    this.setState((state,props)=>{
+      state.cart.products
+    })
+    fetch(`https://fakestoreapi.com/carts/${cart.id}`, {
+      method: "PUT",
+      body: JSON.stringify(
+        cart
+      ),
+    })
+      .then((res) => res.json())
+      .then((json) => console.log(json));
+  };
+
+  
+
   componentDidMount() {
-    fetch("https://fakestoreapi.com/products")
+    fetch("https://fakestoreapi.com/carts/1")
       .then((res) => res.json())
       .then((json) => {
-        console.log(json);
         this.setState({
           isLoading: true,
-          items: json,
+          cart: json,
         });
       });
   }
@@ -39,7 +59,7 @@ class App extends Component {
   }
 
   render() {
-    var { isLoading, items } = this.state;
+    var { isLoading, cart } = this.state;
 
     if (!isLoading) {
       return (
@@ -73,8 +93,16 @@ class App extends Component {
               </div>
             </div>
 
-            {items.map((item, key) => {
-              return <Products item={item} key={key} />;
+            {cart.products.map((product, key) => {
+              return (
+                <Products
+                  productId={product.productId}
+                  qty={product.quantity}
+                  key={key}
+                  cartId={cart.id}
+                  userId={cart.userId}
+                />
+              );
             })}
 
             <div className="row justify-content-center">
@@ -172,12 +200,7 @@ const Payments = () => {
               <p className="mb-1 text-left">Total (tax included)</p>
               <h6 className="mb-1 text-right">$26.48</h6>
             </div>{" "}
-            <button
-              className="btn-block btn-blue"
-              onClick={() => {
-               
-              }}
-            >
+            <button className="btn-block btn-blue" onClick={() => {}}>
               {" "}
               <span>
                 {" "}
@@ -192,31 +215,49 @@ const Payments = () => {
   );
 };
 
-const Products = ({ item }) => {
+const Products = ({ productId, qty, cartId, userId }) => {
+  const [Product, setProduct] = useState({});
   const {
     category = "no category",
     description,
     id,
     image,
-    price,
+    price = 0,
     title,
-  } = item;
+  } = Product;
+  const [Quantity, setQuantity] = useState(Number(qty));
+  const [priceTag, setPriceTag] = useState(Number(price));
 
-  const [Quantity, setQuantity] = useState(1);
-  const [priceTag, setPriceTag] = useState(price);
   const increaseQuantity = () => {
-    setQuantity((prevQuantity) => prevQuantity + 1);
+    setQuantity((prevQuantity) => {
+      const qty = prevQuantity + 1;
+      //setCartQuantity(qty)
+      return qty;
+    });
   };
 
   useEffect(() => {
+    fetch(`https://fakestoreapi.com/products/${productId}`)
+      .then((res) => res.json())
+      .then((json) => {
+        setProduct(json);
+      });
+  }, [productId]);
+
+  useEffect(() => {
     const newPrice = price * Quantity;
+    console.log(Quantity, "Quantity");
+    console.log(price, "Price");
+    console.log(newPrice, "New Price");
     setPriceTag(newPrice);
-  }, [Quantity]);
+  }, [Quantity, price]);
 
   const decreaseQuantity = () => {
     setQuantity((prevQuantity) => {
       if (prevQuantity > 1) {
-        return prevQuantity - 1;
+        const qty = prevQuantity - 1;
+        //setCartQuantity(qty)
+        return qty;
       }
       return prevQuantity;
     });

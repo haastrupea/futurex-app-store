@@ -7,33 +7,38 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      cartProduct: {
-
-      },
+      productWithPrice: [],
       cart: {},
       isLoading: false,
     };
+    
+    this.updateCartProduct = this.updateCartProduct.bind(this)
   }
 
-  updateCartProduct(quantity, price, productId) {
+  updateCartProduct(hybridCart) {
+    //TODO
+    /*
+    1. Set Quantity and productId in the cart
+    2. Set Price and productId in cartProduct
+    */
 
-    
-    this.setState((state,props)=>{
-      state.cart.products
-    })
-    fetch(`https://fakestoreapi.com/carts/${cart.id}`, {
-      method: "PUT",
-      body: JSON.stringify(
-        cart
-      ),
-    })
-      .then((res) => res.json())
-      .then((json) => console.log(json));
-  };
+    this.setState( (state) => {
+      state.productWithPrice.forEach( (elm) => {
+        if (elm.productId === hybridCart.productId){
+          return {
+            elm
+          }
 
-  
+
+        }
+      })
+
+    })
+      
+  }
 
   componentDidMount() {
+    console.log(this.state);
     fetch("https://fakestoreapi.com/carts/1")
       .then((res) => res.json())
       .then((json) => {
@@ -99,8 +104,7 @@ class App extends Component {
                   productId={product.productId}
                   qty={product.quantity}
                   key={key}
-                  cartId={cart.id}
-                  userId={cart.userId}
+                  updateCart={this.updateCartProduct}
                 />
               );
             })}
@@ -215,12 +219,11 @@ const Payments = () => {
   );
 };
 
-const Products = ({ productId, qty, cartId, userId }) => {
+const Products = ({ productId, qty, updateCart }) => {
   const [Product, setProduct] = useState({});
   const {
     category = "no category",
     description,
-    id,
     image,
     price = 0,
     title,
@@ -231,7 +234,6 @@ const Products = ({ productId, qty, cartId, userId }) => {
   const increaseQuantity = () => {
     setQuantity((prevQuantity) => {
       const qty = prevQuantity + 1;
-      //setCartQuantity(qty)
       return qty;
     });
   };
@@ -250,6 +252,7 @@ const Products = ({ productId, qty, cartId, userId }) => {
     console.log(price, "Price");
     console.log(newPrice, "New Price");
     setPriceTag(newPrice);
+    updateCart({Quantity, price, productId});
   }, [Quantity, price]);
 
   const decreaseQuantity = () => {

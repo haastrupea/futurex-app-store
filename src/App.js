@@ -8,7 +8,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [cart, setCart] = useState({});
   const [cartFetched, setCartFetched] = useState(false);
-  // const [cartProducts,setCartProducts] = useState([])
+  const [cartProducts,setCartProducts] = useState([])
 
   const removeProduct = (productId) => {
     setCart((prevCart) => {
@@ -26,8 +26,26 @@ const App = () => {
     });
   };
 
-  const updateProduct = (quantity, productId) => {
-    setCart(({ id, userId, date, products }) => {
+  const updateProductDetails = (price, quantity, productId) => {
+    // const {id, userId, date, products}
+    
+    setCartProducts((prevDetails) => {
+      const newDetails = prevDetails.filter(
+        (value) => {
+          
+        }
+
+      )
+      if (prevDetails.productId === productId) {
+        
+      }
+      
+    })
+  }
+
+  const updateProduct = (quantity, price, productId) => {
+
+    setCart(({id, userId, date, products}) => {
       const newProducts = [];
       products.forEach((product) => {
         if (product.productId === productId) {
@@ -72,12 +90,6 @@ const App = () => {
     }
   }, [cartFetched]);
 
-  // useEffect(() => {
-  //   if(cartFetched ){
-  //     updateCart();
-  //   }
-  // }, [cart]);
-
   return isLoading ? (
     <div className="container-loader">
       <div className="spinner-border" role="status">
@@ -119,12 +131,46 @@ const App = () => {
           );
         })}
         {cart.products.length === 0 && (
-          <div className="p-4">
-            <h1 className="text-center">Cart Empty</h1>
-            <span>
-              <br />
-            </span>
-            <a href="/">Reload Page</a>
+          // <div className="p-4">
+          //   <h1 className="text-center">Cart Empty</h1>
+          //   <span>
+          //     <br />
+          //   </span>
+          //   <a href="/">Reload Page</a>
+          // </div>
+
+          <div class="container-fluid mt-100">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    
+                  </div>
+                  <div class="card-body cart">
+                    <div class="col-sm-12 empty-cart-cls text-center">
+                      {" "}
+                      <img
+                        src="https://i.imgur.com/dCdflKN.png"
+                        width="130"
+                        height="130"
+                        class="img-fluid mb-4 mr-3"
+                      />
+                      <h3>
+                        <strong>Your Cart is Empty</strong>
+                      </h3>
+                      <h4>Add something to make me happy :)</h4>{" "}
+                      <a
+                        href="/"
+                        class="btn btn-primary cart-btn-transform m-3"
+                        data-abc="true"
+                      >
+                        continue shopping
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
         <div className="row justify-content-center">

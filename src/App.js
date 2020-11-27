@@ -26,7 +26,7 @@ const App = () => {
     });
   };
 
-  const updateProductQuantity = (quantity, productId) => {
+  const updateProduct = (quantity, productId) => {
     setCart(({ id, userId, date, products }) => {
       const newProducts = [];
       products.forEach((product) => {
@@ -112,7 +112,7 @@ const App = () => {
             <Products
               productId={product.productId}
               qty={product.quantity}
-              updateQuantity={updateProductQuantity}
+              updateQuantity={updateProduct}
               removeProduct={removeProduct}
               key={key}
             />
@@ -252,7 +252,7 @@ const Products = ({ productId, qty, removeProduct, updateQuantity }) => {
       const qty = prevQuantity + 1;
       return qty;
     });
-    updateProductQuantity();
+    updateProduct();
   };
 
   useEffect(() => {
@@ -280,13 +280,13 @@ const Products = ({ productId, qty, removeProduct, updateQuantity }) => {
       return prevQuantity;
     });
 
-    updateProductQuantity();
+    updateProduct();
   };
 
   const removeCartProduct = () => {
     removeProduct(productId);
   };
-  const updateProductQuantity = () => {
+  const updateProduct = () => {
     updateQuantity(Quantity, productId);
   };
 

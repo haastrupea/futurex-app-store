@@ -1,107 +1,139 @@
 import React, { Component, useEffect, useState } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { Cart } from "react-bootstrap-icons";
 // import PayPal from "./components/Paypal";
 
-const App =()=>{
-
-  const [isLoading,setIsLoading] = useState(true)
-  const [cart,setCart] = useState(null)
+const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [cart, setCart] = useState({});
+  const [cartFetched, setCartFetched] = useState(false);
   // const [cartProducts,setCartProducts] = useState([])
 
-  const removeProduct = (productId)=>{
-    setCart(({id,userId,date,products})=> {
-      const newProducts = products.filter(value=>value.productId!==productId);
-      return {id,userId,date,newProducts}
+  const removeProduct = (productId) => {
+    setCart((prevCart) => {
+      const newProducts = prevCart.products.filter(
+        (value) => value.productId !== productId
+      );
+
+      return {
+        id: prevCart.id,
+        userId: prevCart.userId,
+        date: prevCart.date,
+        products: newProducts,
+      };
+      //return prevCart
+    });
+  };
+
+  const updateProductQuantity = (quantity, productId) => {
+    setCart(({ id, userId, date, products }) => {
+      const newProducts = [];
+      products.forEach((product) => {
+        if (product.productId === productId) {
+          newProducts.push({ productId, quantity });
+        } else {
+          newProducts.push(product);
+        }
+      });
+
+      return {
+        id,
+        userId,
+        date,
+        products: newProducts,
+      };
+    });
+  };
+
+  const updateCart = () => {
+    const { id, userId, date, products } = cart;
+    fetch(`https://fakestoreapi.com/carts/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ userId, date, products }),
     })
-  }
+      .then((res) => res.json())
+      .then((cart) => setCart(cart));
+  };
 
-
-  const updateProductQuantity = (quantity,productId) =>{
-     setCart(({id,userId,date,products})=>{
-       const newProducts=[];
-            products.forEach(product => {
-              if(product.productId===productId){
-                newProducts.push({productId,quantity})
-              }else{
-                newProducts.push(product)
-              }
-            });
-
-       return {
-         id,userId,date,products:newProducts
-       }
-     })
-  }
-  useEffect(()=>{
-    const {id,userId,date,products} = cart;
-    fetch(`https://fakestoreapi.com/carts/${id}`,{
-            method:"PUT",
-            body:JSON.stringify({userId,date,products})
-        })
-        .then(res=>res.json())
-        .then(cart=>setCart(cart))
-  },[cart])
-
-  useEffect(()=>{
+  const fetchCart = () => {
     fetch("https://fakestoreapi.com/carts/1")
       .then((res) => res.json())
       .then((cart) => {
-       setCart(cart);
-       setIsLoading(false);
+        setCart(cart);
+        setIsLoading(false);
+        setCartFetched(true);
       });
-  })
+  };
 
-  return (
-  (isLoading)?
-        <div className="container-loader">
-          <div className="spinner-border" role="status">
-            <span className="sr-only">Loading...</span>
+  useEffect(() => {
+    if (cartFetched === false) {
+      fetchCart();
+    }
+  }, [cartFetched]);
+
+  // useEffect(() => {
+  //   if(cartFetched ){
+  //     updateCart();
+  //   }
+  // }, [cart]);
+
+  return isLoading ? (
+    <div className="container-loader">
+      <div className="spinner-border" role="status">
+        <span className="sr-only">Loading...</span>
+      </div>
+    </div>
+  ) : (
+    <div className="App">
+      <div className="container px-4 py-5 mx-auto">
+        <div className="row d-flex justify-content-center">
+          <div className="col-5">
+            <h4 className="heading">Shopping Bag</h4>
           </div>
-        </div>
-      :
-        <div className="App">
-          <div className="container px-4 py-5 mx-auto">
-            <div className="row d-flex justify-content-center">
-              <div className="col-5">
-                <h4 className="heading">Shopping Bag</h4>
+          <div className="col-7">
+            <div className="text-right row">
+              <div className="col">
+                <h6 className="mt-2">Category</h6>
               </div>
-              <div className="col-7">
-                <div className="text-right row">
-                  <div className="col">
-                    <h6 className="mt-2">Category</h6>
-                  </div>
-                  <div className="col">
-                    <h6 className="mt-2">Quantity</h6>
-                  </div>
-                  <div className="col">
-                    <h6 className="mt-2">Price</h6>
-                  </div>
-                  <div className="col"></div>
-                </div>
+              <div className="col">
+                <h6 className="mt-2">Quantity</h6>
               </div>
-            </div>
-
-            {cart.products.map((product, key) => {
-              return (
-                <Products
-                  productId = {product.productId}
-                  qty = {product.quantity}
-                  updateQuantity = {updateProductQuantity}
-                  removeProduct = {removeProduct}
-                  key={key}
-                />
-              );
-            })}
-
-            <div className="row justify-content-center">
-              <Payments />
+              <div className="col">
+                <h6 className="mt-2">Price</h6>
+              </div>
+              <div className="col"></div>
             </div>
           </div>
         </div>
-        )
-}
 
+        {cart.products.map((product, key) => {
+          return (
+            <Products
+              productId={product.productId}
+              qty={product.quantity}
+              updateQuantity={updateProductQuantity}
+              removeProduct={removeProduct}
+              key={key}
+            />
+          );
+        })}
+        {cart.products.length === 0 && (
+          <div className="p-4">
+            <h1 className="text-center">Cart Empty</h1>
+            <span>
+              <br />
+            </span>
+            <a href="/">Reload Page</a>
+          </div>
+        )}
+        <div className="row justify-content-center">
+          <Payments />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Payments = () => {
   return (
@@ -203,7 +235,7 @@ const Payments = () => {
   );
 };
 
-const Products = ({ productId, qty,removeProduct,updateQuantity}) => {
+const Products = ({ productId, qty, removeProduct, updateQuantity }) => {
   const [Product, setProduct] = useState({});
   const {
     category = "no category",
@@ -220,7 +252,7 @@ const Products = ({ productId, qty,removeProduct,updateQuantity}) => {
       const qty = prevQuantity + 1;
       return qty;
     });
-    updateProductQuantity()
+    updateProductQuantity();
   };
 
   useEffect(() => {
@@ -248,15 +280,15 @@ const Products = ({ productId, qty,removeProduct,updateQuantity}) => {
       return prevQuantity;
     });
 
-    updateProductQuantity()
+    updateProductQuantity();
   };
 
-  const removeCartProduct = () =>{
-    removeProduct(productId)
-  }
-  const updateProductQuantity = ()=>{
-    updateQuantity(Quantity,productId)
-  }
+  const removeCartProduct = () => {
+    removeProduct(productId);
+  };
+  const updateProductQuantity = () => {
+    updateQuantity(Quantity, productId);
+  };
 
   return (
     <div className="row d-flex justify-content-center border-top">
@@ -296,7 +328,11 @@ const Products = ({ productId, qty,removeProduct,updateQuantity}) => {
             <h6 className="mob-text">Cost: ${priceTag}</h6>
           </div>
           <div className="col">
-            <button onClick={removeCartProduct} type="button" className="btn btn-danger">
+            <button
+              onClick={removeCartProduct}
+              type="button"
+              className="btn btn-danger"
+            >
               Remove
             </button>
           </div>

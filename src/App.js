@@ -27,24 +27,25 @@ const App = () => {
   };
 
   const updateProductDetails = (price, quantity, productId) => {
-    // const {id, userId, date, products}
-    
-    setCartProducts((prevDetails) => {
-      const newDetails = prevDetails.filter(
-        (value) => {
-          
-        }
 
-      )
-      if (prevDetails.productId === productId) {
-        
-      }
-      
-    })
+        setCartProducts((prevDetails) => {
+          const newDetails = []
+          if (prevDetails.length !== 0){
+            prevDetails.forEach((elm)=>{
+              if(elm.productId === productId){
+                newDetails.push({price,quantity,productId})
+              }else{
+                newDetails.push(elm)
+              }
+              return newDetails
+            })           
+          }       
+          return [{price,quantity,productId}]
+        })
   }
-
   const updateProduct = (quantity, price, productId) => {
-
+    updateProductDetails(quantity, price, productId);
+    console.log(cartProducts)
     setCart(({id, userId, date, products}) => {
       const newProducts = [];
       products.forEach((product) => {
@@ -174,14 +175,27 @@ const App = () => {
           </div>
         )}
         <div className="row justify-content-center">
-          <Payments />
+          <Payments productDetails={cartProducts} />
         </div>
       </div>
     </div>
   );
 };
 
-const Payments = () => {
+const Payments = ({productDetails}) => {
+    const [subTotal,setSubTotal] = useState(0)
+    const shipping = 2.99;
+    const tax = 10
+  useEffect(()=>{
+    console.log(productDetails)
+  if(productDetails.length !== 0){
+    const subTotal = productDetails.reduce((total,cur)=>{
+      return (total.price*total.quantity)+(cur.price*cur.quantity)
+    })
+    setSubTotal(subTotal)
+  }
+  },[productDetails])
+
   return (
     <div className="col-lg-12">
       <div className="card">
@@ -256,22 +270,22 @@ const Payments = () => {
           <div className="mt-2 col-lg-4">
             <div className="px-4 row d-flex justify-content-between">
               <p className="mb-1 text-left">Subtotal</p>
-              <h6 className="mb-1 text-right">$23.49</h6>
+              <h6 className="mb-1 text-right">${subTotal}</h6>
             </div>
             <div className="px-4 row d-flex justify-content-between">
               <p className="mb-1 text-left">Shipping</p>
-              <h6 className="mb-1 text-right">$2.99</h6>
+  <h6 className="mb-1 text-right">${shipping}</h6>
             </div>
             <div className="px-4 row d-flex justify-content-between" id="tax">
               <p className="mb-1 text-left">Total (tax included)</p>
-              <h6 className="mb-1 text-right">$26.48</h6>
+  <h6 className="mb-1 text-right">${subTotal+shipping+tax}</h6>
             </div>{" "}
             <button className="btn-block btn-blue" onClick={() => {}}>
               {" "}
               <span>
                 {" "}
                 <span id="checkout">Checkout</span>{" "}
-                <span id="check-amt">$26.48</span>{" "}
+  <span id="check-amt">${subTotal+shipping+tax}</span>{" "}
               </span>{" "}
             </button>
           </div>
@@ -311,10 +325,8 @@ const Products = ({ productId, qty, removeProduct, updateQuantity }) => {
 
   useEffect(() => {
     const newPrice = price * Quantity;
-    console.log(Quantity, "Quantity");
-    console.log(price, "Price");
-    console.log(newPrice, "New Price");
     setPriceTag(newPrice);
+    updateQuantity(Quantity,price, productId);
   }, [Quantity, price]);
 
   const decreaseQuantity = () => {
@@ -333,7 +345,7 @@ const Products = ({ productId, qty, removeProduct, updateQuantity }) => {
     removeProduct(productId);
   };
   const updateProduct = () => {
-    updateQuantity(Quantity, productId);
+    updateQuantity(Quantity,price, productId);
   };
 
   return (

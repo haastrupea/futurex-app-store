@@ -3,79 +3,63 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 // import PayPal from "./components/Paypal";
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      productWithPrice: [],
-      cart: {},
-      isLoading: false,
-    };
-    
-    this.updateCartProduct = this.updateCartProduct.bind(this)
-  }
+const App =()=>{
 
-  updateCartProduct(hybridCart) {
-    //TODO
-    /*
-    1. Set Quantity and productId in the cart
-    2. Set Price and productId in cartProduct
-    */
+  const [isLoading,setIsLoading] = useState(true)
+  const [cart,setCart] = useState(null)
+  // const [cartProducts,setCartProducts] = useState([])
 
-    this.setState( (state) => {
-      state.productWithPrice.forEach( (elm) => {
-        if (elm.productId === hybridCart.productId){
-          return {
-            elm
-          }
-
-
-        }
-      })
-
+  const removeProduct = (productId)=>{
+    setCart(({id,userId,date,products})=> {
+      const newProducts = products.filter(value=>value.productId!==productId);
+      return {id,userId,date,newProducts}
     })
-      
   }
 
-  componentDidMount() {
-    console.log(this.state);
+
+  const updateProductQuantity = (quantity,productId) =>{
+     setCart(({id,userId,date,products})=>{
+       const newProducts=[];
+            products.forEach(product => {
+              if(product.productId===productId){
+                newProducts.push({productId,quantity})
+              }else{
+                newProducts.push(product)
+              }
+            });
+
+       return {
+         id,userId,date,products:newProducts
+       }
+     })
+  }
+  useEffect(()=>{
+    const {id,userId,date,products} = cart;
+    fetch(`https://fakestoreapi.com/carts/${id}`,{
+            method:"PUT",
+            body:JSON.stringify({userId,date,products})
+        })
+        .then(res=>res.json())
+        .then(cart=>setCart(cart))
+  },[cart])
+
+  useEffect(()=>{
     fetch("https://fakestoreapi.com/carts/1")
       .then((res) => res.json())
-      .then((json) => {
-        this.setState({
-          isLoading: true,
-          cart: json,
-        });
+      .then((cart) => {
+       setCart(cart);
+       setIsLoading(false);
       });
-  }
+  })
 
-  componentDidCatch() {
-    fetch("https://fakestoreapi.com/carts/6", {
-      method: "DELETE",
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        console.log(json);
-        this.setState({
-          isLoading: this,
-          items: json,
-        });
-      });
-  }
-
-  render() {
-    var { isLoading, cart } = this.state;
-
-    if (!isLoading) {
-      return (
+  return (
+  (isLoading)?
         <div className="container-loader">
           <div className="spinner-border" role="status">
             <span className="sr-only">Loading...</span>
           </div>
         </div>
-      );
-    } else {
-      return (
+      :
         <div className="App">
           <div className="container px-4 py-5 mx-auto">
             <div className="row d-flex justify-content-center">
@@ -83,7 +67,7 @@ class App extends Component {
                 <h4 className="heading">Shopping Bag</h4>
               </div>
               <div className="col-7">
-                <div className="row text-right">
+                <div className="text-right row">
                   <div className="col">
                     <h6 className="mt-2">Category</h6>
                   </div>
@@ -101,10 +85,11 @@ class App extends Component {
             {cart.products.map((product, key) => {
               return (
                 <Products
-                  productId={product.productId}
-                  qty={product.quantity}
+                  productId = {product.productId}
+                  qty = {product.quantity}
+                  updateQuantity = {updateProductQuantity}
+                  removeProduct = {removeProduct}
                   key={key}
-                  updateCart={this.updateCartProduct}
                 />
               );
             })}
@@ -114,10 +99,9 @@ class App extends Component {
             </div>
           </div>
         </div>
-      );
-    }
-  }
+        )
 }
+
 
 const Payments = () => {
   return (
@@ -125,7 +109,7 @@ const Payments = () => {
       <div className="card">
         <div className="row">
           <div className="col-lg-3 radio-group">
-            <div className="row d-flex px-3 radio">
+            <div className="px-3 row d-flex radio">
               {" "}
               <img
                 className="pay"
@@ -134,7 +118,7 @@ const Payments = () => {
               />
               <p className="my-auto">Credit Card</p>
             </div>
-            <div className="row d-flex px-3 radio gray">
+            <div className="px-3 row d-flex radio gray">
               {" "}
               <img
                 className="pay"
@@ -143,7 +127,7 @@ const Payments = () => {
               />
               <p className="my-auto">Debit Card</p>
             </div>
-            <div className="row d-flex px-3 radio gray mb-3">
+            <div className="px-3 mb-3 row d-flex radio gray">
               {" "}
               <img
                 className="pay"
@@ -154,7 +138,7 @@ const Payments = () => {
             </div>
           </div>
           <div className="col-lg-5">
-            <div className="row px-2">
+            <div className="px-2 row">
               <div className="form-group col-md-6">
                 {" "}
                 <label className="form-control-label">Name on Card</label>{" "}
@@ -176,7 +160,7 @@ const Payments = () => {
                 />{" "}
               </div>
             </div>
-            <div className="row px-2">
+            <div className="px-2 row">
               <div className="form-group col-md-6">
                 {" "}
                 <label className="form-control-label">
@@ -191,16 +175,16 @@ const Payments = () => {
               </div>
             </div>
           </div>
-          <div className="col-lg-4 mt-2">
-            <div className="row d-flex justify-content-between px-4">
+          <div className="mt-2 col-lg-4">
+            <div className="px-4 row d-flex justify-content-between">
               <p className="mb-1 text-left">Subtotal</p>
               <h6 className="mb-1 text-right">$23.49</h6>
             </div>
-            <div className="row d-flex justify-content-between px-4">
+            <div className="px-4 row d-flex justify-content-between">
               <p className="mb-1 text-left">Shipping</p>
               <h6 className="mb-1 text-right">$2.99</h6>
             </div>
-            <div className="row d-flex justify-content-between px-4" id="tax">
+            <div className="px-4 row d-flex justify-content-between" id="tax">
               <p className="mb-1 text-left">Total (tax included)</p>
               <h6 className="mb-1 text-right">$26.48</h6>
             </div>{" "}
@@ -219,7 +203,7 @@ const Payments = () => {
   );
 };
 
-const Products = ({ productId, qty, updateCart }) => {
+const Products = ({ productId, qty,removeProduct,updateQuantity}) => {
   const [Product, setProduct] = useState({});
   const {
     category = "no category",
@@ -236,6 +220,7 @@ const Products = ({ productId, qty, updateCart }) => {
       const qty = prevQuantity + 1;
       return qty;
     });
+    updateProductQuantity()
   };
 
   useEffect(() => {
@@ -252,19 +237,26 @@ const Products = ({ productId, qty, updateCart }) => {
     console.log(price, "Price");
     console.log(newPrice, "New Price");
     setPriceTag(newPrice);
-    updateCart({Quantity, price, productId});
   }, [Quantity, price]);
 
   const decreaseQuantity = () => {
     setQuantity((prevQuantity) => {
       if (prevQuantity > 1) {
         const qty = prevQuantity - 1;
-        //setCartQuantity(qty)
         return qty;
       }
       return prevQuantity;
     });
+
+    updateProductQuantity()
   };
+
+  const removeCartProduct = () =>{
+    removeProduct(productId)
+  }
+  const updateProductQuantity = ()=>{
+    updateQuantity(Quantity,productId)
+  }
 
   return (
     <div className="row d-flex justify-content-center border-top">
@@ -280,12 +272,12 @@ const Products = ({ productId, qty, updateCart }) => {
         </div>
       </div>
       <div className="my-auto col-7">
-        <div className="row text-right">
+        <div className="text-right row">
           <div className="col">
             <p className="mob-text">{category}</p>
           </div>
           <div className="col">
-            <div className="row d-flex justify-content-end px-3">
+            <div className="px-3 row d-flex justify-content-end">
               <p className="mb-0" id="cnt1">
                 <span>{Quantity}</span>
               </p>
@@ -304,7 +296,7 @@ const Products = ({ productId, qty, updateCart }) => {
             <h6 className="mob-text">Cost: ${priceTag}</h6>
           </div>
           <div className="col">
-            <button type="button" className="btn btn-danger">
+            <button onClick={removeCartProduct} type="button" className="btn btn-danger">
               Remove
             </button>
           </div>
